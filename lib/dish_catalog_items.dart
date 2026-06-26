@@ -85,21 +85,28 @@ final categoryPicker = CatalogItem(
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
     final categories = (data['categories']! as List).cast<String>();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final category in categories)
-          ElevatedButton(
-            onPressed: () => _callFunctionAndNotify(
-              itemContext,
-              functionName: 'setBrowsingCategory',
-              functionArgs: {'category': category},
-              eventName: 'categoryPicked',
-            ),
-            child: Text(category),
+    return TornPaperCard(
+      child: SizedBox(
+        height: 70,
+        child: Center(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final category in categories)
+                ElevatedButton(
+                  onPressed: () => _callFunctionAndNotify(
+                    itemContext,
+                    functionName: 'setBrowsingCategory',
+                    functionArgs: {'category': category},
+                    eventName: 'categoryPicked',
+                  ),
+                  child: Text(category),
+                ),
+            ],
           ),
-      ],
+        ),
+      ),
     );
   },
   exampleData: [
