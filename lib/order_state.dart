@@ -167,6 +167,20 @@ class OrderState extends ChangeNotifier {
     _markDirty();
   }
 
+  /// Clears every diner's order and the browsing category, and resets
+  /// [status] back to [SessionStatus.browsing].
+  ///
+  /// Used when the user returns to the menu after confirming an order, so a
+  /// fresh order can start without dragging the previous one along. Less
+  /// drastic than recreating the whole session via the toolbar reset button
+  /// — the conversation history is preserved.
+  void startNewOrder() {
+    _diners.clear();
+    _browsingCategory = null;
+    _status = SessionStatus.browsing;
+    _markDirty();
+  }
+
   void _markDirty() {
     _dirty = true;
     notifyListeners();
@@ -178,6 +192,10 @@ class OrderState extends ChangeNotifier {
   JsonMap? takeSnapshotIfDirty() {
     if (!_dirty) return null;
     _dirty = false;
+    // The CartView's "Update order" button is bound to [isDirty], so flip
+    // back to false needs a notify too — otherwise the button stays
+    // enabled visually after the snapshot is sent.
+    notifyListeners();
     return toJson();
   }
 

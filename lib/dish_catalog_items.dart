@@ -1,4 +1,5 @@
 import 'package:dino/catalog_activity.dart';
+import 'package:dino/order_state.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
@@ -43,11 +44,11 @@ Future<void> _callFunction(
 /// model immediately via a [UserActionEvent], so it can render a follow-up
 /// surface in response.
 ///
-/// Use this for buttons where doing nothing visible would be confusing
-/// (e.g. picking a category should immediately show dishes in that
-/// category). Buttons whose effect is already obvious on-screen (e.g.
-/// adjusting a cart row's quantity) don't need this — let the state-snapshot
-/// injection on the user's next typed turn carry the change.
+/// Use this for any button whose effect isn't already self-evidently
+/// reflected on screen — which in practice is most of them, since visible
+/// data (cart quantities, totals, etc.) comes from the model's last
+/// rendered surface and doesn't update until a new surface is generated.
+/// One LLM round-trip per tap is the cost of keeping the UI honest.
 Future<void> _callFunctionAndNotify(
   CatalogItemContext itemContext, {
   required String functionName,
@@ -203,15 +204,16 @@ class _DishCardState extends State<_DishCard> {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: () => _callFunction(
+                  onPressed: () => _callFunctionAndNotify(
                     widget.itemContext,
-                    'addOrderItem',
-                    {
+                    functionName: 'addOrderItem',
+                    functionArgs: {
                       'dinerName': dinerName,
                       'dishName': dishName,
                       'unitCost': unitCost,
                       'quantity': _quantity,
                     },
+                    eventName: 'orderItemAdded',
                   ),
                   child: const Text('Add to order'),
                 ),
@@ -225,140 +227,185 @@ class _DishCardState extends State<_DishCard> {
 }
 
 // 3. Cart view — lists items across diners with a quantity stepper, a
-// remove action, and a "review order" button that advances the session.
-// Placeholder for your teammate's cart view.
+// remove action, an "Update order" button that pushes pending changes to
+// the model, and a "Checkout" button that advances the session. Placeholder
+// for your teammate's cart view.
+//
+// Unlike the other catalog items, this one renders directly from
+// [OrderState] rather than from the data the model passes in. That lets
+// `+`/`-`/delete mutate state and reflect immediately on screen without a
+// model round-trip per tap. The model is told about the changes only when
+// the user explicitly taps "Update order".
 final cartView = CatalogItem(
   name: 'CartView',
   dataSchema: S.object(
-    description: "Lists the current order's items across diners.",
-    properties: {
-      'items': S.list(
-        description: 'The order items to display.',
-        items: S.object(
-          properties: {
-            'dinerName': S.string(),
-            'itemId': S.string(),
-            'dishName': S.string(),
-            'quantity': S.integer(),
-            'unitCost': S.number(),
-          },
-          required: [
-            'dinerName',
-            'itemId',
-            'dishName',
-            'quantity',
-            'unitCost',
-          ],
-        ),
-      ),
-    },
-    required: ['items'],
+    description:
+        "Lists the current order's items across diners. Items are read "
+        'from the local OrderState; you do not need to pass them in.',
+    properties: {},
   ),
-  widgetBuilder: (itemContext) {
-    final data = itemContext.data as JsonMap;
-    final items = (data['items'] as List).cast<JsonMap>();
-
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Cart',
-              style: Theme.of(itemContext.buildContext).textTheme.titleMedium,
-            ),
-            for (final item in items)
-              _CartRow(itemContext: itemContext, item: item),
-            const Divider(),
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () =>
-                    _callFunction(itemContext, 'setSessionStatus', {
-                      'status': 'reviewing',
-                    }),
-                child: const Text('Review order'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  },
+  widgetBuilder: (itemContext) => _CartView(itemContext: itemContext),
   exampleData: [
     () => '''
       [
         {
           "id": "root",
-          "component": "CartView",
-          "items": [
-            {
-              "dinerName": "Abhishek",
-              "itemId": "item_0",
-              "dishName": "Pterodactyl Wings",
-              "quantity": 2,
-              "unitCost": 18.99
-            }
-          ]
+          "component": "CartView"
         }
       ]
     ''',
   ],
 );
 
-class _CartRow extends StatelessWidget {
-  const _CartRow({required this.itemContext, required this.item});
+class _CartView extends StatelessWidget {
+  const _CartView({required this.itemContext});
 
   final CatalogItemContext itemContext;
-  final JsonMap item;
 
   @override
   Widget build(BuildContext context) {
-    final dinerName = item['dinerName'] as String;
-    final itemId = item['itemId'] as String;
-    final dishName = item['dishName'] as String;
-    final quantity = (item['quantity'] as num).toInt();
-    final unitCost = (item['unitCost'] as num).toDouble();
+    final orderState = CatalogActivity.currentOrderState;
+    if (orderState == null) {
+      return const SizedBox.shrink();
+    }
+    return ListenableBuilder(
+      listenable: orderState,
+      builder: (context, _) {
+        final rows = <_CartRowData>[
+          for (final dinerEntry in orderState.diners.entries)
+            for (final item in dinerEntry.value.items)
+              _CartRowData(dinerName: dinerEntry.key, item: item),
+        ];
+        final total = rows.fold<double>(
+          0,
+          (sum, row) => sum + row.item.unitCost * row.item.quantity,
+        );
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Cart',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (rows.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Text('Your cart is empty.'),
+                  )
+                else
+                  for (final row in rows)
+                    _CartRow(orderState: orderState, row: row),
+                const Divider(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      'Total: \$${total.toStringAsFixed(2)}',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // Enabled only when there are local-only changes the
+                    // model hasn't seen yet. The dirty flag clears as soon
+                    // as a snapshot is sent on the next model turn, so
+                    // this button auto-disables once changes are in sync.
+                    OutlinedButton(
+                      onPressed: orderState.isDirty
+                          ? () => _callFunctionAndNotify(
+                              itemContext,
+                              functionName: 'setSessionStatus',
+                              // No-op status change just to fit through
+                              // the existing helper; the real signal here
+                              // is the cartUpdateRequested event plus the
+                              // state snapshot it carries.
+                              functionArgs: {'status': orderState.status.name},
+                              eventName: 'cartUpdateRequested',
+                            )
+                          : null,
+                      child: const Text('Update order'),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: rows.isEmpty
+                          ? null
+                          : () => _callFunctionAndNotify(
+                              itemContext,
+                              functionName: 'setSessionStatus',
+                              functionArgs: {'status': 'reviewing'},
+                              eventName: 'reviewOrderRequested',
+                            ),
+                      child: const Text('Checkout'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _CartRowData {
+  _CartRowData({required this.dinerName, required this.item});
+
+  final String dinerName;
+  final OrderItem item;
+}
+
+class _CartRow extends StatelessWidget {
+  const _CartRow({required this.orderState, required this.row});
+
+  final OrderState orderState;
+  final _CartRowData row;
+
+  @override
+  Widget build(BuildContext context) {
+    final item = row.item;
+    final lineTotal = item.unitCost * item.quantity;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text('$dishName ($dinerName)')),
+          Expanded(child: Text('${item.dishName} (${row.dinerName})')),
+          // Local-only mutations. No event dispatch, no LLM round-trip.
+          // The model finds out about these only when the user taps
+          // "Update order" (or any other notify-style button).
           IconButton(
             icon: const Icon(Icons.remove),
-            onPressed: () => _callFunction(
-              itemContext,
-              'updateOrderItemQuantity',
-              {
-                'dinerName': dinerName,
-                'itemId': itemId,
-                'quantity': quantity - 1,
-              },
+            onPressed: () => orderState.updateItemQuantity(
+              dinerName: row.dinerName,
+              itemId: item.id,
+              quantity: item.quantity - 1,
             ),
           ),
-          Text('$quantity'),
+          Text('${item.quantity}'),
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () => _callFunction(
-              itemContext,
-              'updateOrderItemQuantity',
-              {
-                'dinerName': dinerName,
-                'itemId': itemId,
-                'quantity': quantity + 1,
-              },
+            onPressed: () => orderState.updateItemQuantity(
+              dinerName: row.dinerName,
+              itemId: item.id,
+              quantity: item.quantity + 1,
             ),
           ),
-          Text('\$${(unitCost * quantity).toStringAsFixed(2)}'),
+          Text('\$${lineTotal.toStringAsFixed(2)}'),
           IconButton(
             icon: const Icon(Icons.delete_outline),
-            onPressed: () => _callFunction(itemContext, 'removeOrderItem', {
-              'dinerName': dinerName,
-              'itemId': itemId,
-            }),
+            onPressed: () => orderState.removeItem(
+              dinerName: row.dinerName,
+              itemId: item.id,
+            ),
           ),
         ],
       ),
@@ -395,10 +442,12 @@ final paymentCard = CatalogItem(
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
-                onPressed: () =>
-                    _callFunction(itemContext, 'setSessionStatus', {
-                      'status': 'confirmed',
-                    }),
+                onPressed: () => _callFunctionAndNotify(
+                  itemContext,
+                  functionName: 'setSessionStatus',
+                  functionArgs: {'status': 'confirmed'},
+                  eventName: 'orderConfirmed',
+                ),
                 child: const Text('Confirm & Pay'),
               ),
             ),

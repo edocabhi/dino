@@ -1,3 +1,4 @@
+import 'package:dino/order_state.dart';
 import 'package:flutter/foundation.dart';
 
 /// Tracks whether a catalog-item-triggered function call (a widget's
@@ -15,4 +16,13 @@ class CatalogActivity {
   CatalogActivity._();
 
   static final ValueNotifier<bool> isCallInProgress = ValueNotifier(false);
+
+  /// The [OrderState] of the currently active session, or null when no
+  /// session exists.
+  ///
+  /// Catalog item widgets (e.g. CartView) read from this so they can
+  /// render local state directly instead of going through the model's last
+  /// surface — needed when a tap should update the UI optimistically
+  /// without an LLM round-trip. Owned and lifecycled by GenUiSession.
+  static OrderState? currentOrderState;
 }
