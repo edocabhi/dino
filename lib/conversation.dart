@@ -20,6 +20,7 @@ class GenUiSession {
   GenUiSession({
     required ModelClient Function({required String systemPrompt})
     modelClientBuilder,
+    String? additionalPromptContext,
   }) {
     /// The catalog defines the surfaces the model can render and how to
     /// render them.
@@ -35,7 +36,10 @@ class GenUiSession {
     /// the LLM
     final combinedPrompt = PromptBuilder.chat(
       catalog: catalog,
-      systemPromptFragments: [systemPrompt],
+      systemPromptFragments: [
+        systemPrompt,
+        ?additionalPromptContext,
+      ],
     ).systemPromptJoined();
 
     _modelClient = modelClientBuilder(systemPrompt: combinedPrompt);
