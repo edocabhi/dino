@@ -1,0 +1,18 @@
+flutter_launcher_icons:
+  image_path: "assets/images/dino_app_icon.png"
+  
+  platforms:
+    ios: true
+    android: true
+    macos: false
+    windows: false
+    web: false
+  
+  ios:
+    generate: true
+  
+  android:
+    generate: true
+    adaptive_icon_foreground: "assets/images/dino_app_icon.png"
+    adaptive_icon_background: "#FFFFFF"
+    adaptive_icon_monochrome: "assets/images/dino_app_icon.png"
