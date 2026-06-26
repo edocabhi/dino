@@ -1,5 +1,5 @@
+import 'package:dino/model/model_client.dart';
 import 'package:genui/genui.dart';
-import 'package:genui_template/model/model_client.dart';
 import 'package:googleai_dart/googleai_dart.dart';
 
 /// A [ModelClient] backed by Google's Gemini models.

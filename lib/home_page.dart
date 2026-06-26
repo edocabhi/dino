@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:dino/conversation.dart';
+import 'package:dino/model/featherless_model_client.dart';
+import 'package:dino/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
-import 'package:genui_template/conversation.dart';
-import 'package:genui_template/model/featherless_model_client.dart';
-import 'package:genui_template/widgets/widgets.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('GenUI'),
+        title: const Text('Dino : Yabba Dabba Dish!'),
       ),
       body: ValueListenableBuilder<ConversationState>(
         valueListenable: _session.conversationState,
