@@ -1,3 +1,4 @@
+import 'package:dino/catalog_activity.dart';
 import 'package:flutter/material.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
@@ -19,16 +20,49 @@ List<CatalogItem> get dishCatalogItems => [
 
 /// Calls a registered [ClientFunction] by [name] with [args], reporting any
 /// error through [itemContext] instead of letting it escape silently.
+///
+/// Flips [CatalogActivity.isCallInProgress] for the call's duration so the
+/// screen can show a busy indicator, the same way it does while waiting on
+/// the model.
 Future<void> _callFunction(
   CatalogItemContext itemContext,
   String name,
   JsonMap args,
 ) async {
+  CatalogActivity.isCallInProgress.value = true;
   try {
     await itemContext.dataContext.resolve({'call': name, 'args': args}).first;
   } on Object catch (exception, stackTrace) {
     itemContext.reportError(exception, stackTrace);
+  } finally {
+    CatalogActivity.isCallInProgress.value = false;
   }
+}
+
+/// Mutates [OrderState] locally via [functionName] and then notifies the
+/// model immediately via a [UserActionEvent], so it can render a follow-up
+/// surface in response.
+///
+/// Use this for buttons where doing nothing visible would be confusing
+/// (e.g. picking a category should immediately show dishes in that
+/// category). Buttons whose effect is already obvious on-screen (e.g.
+/// adjusting a cart row's quantity) don't need this — let the state-snapshot
+/// injection on the user's next typed turn carry the change.
+Future<void> _callFunctionAndNotify(
+  CatalogItemContext itemContext, {
+  required String functionName,
+  required JsonMap functionArgs,
+  required String eventName,
+  JsonMap? eventContext,
+}) async {
+  await _callFunction(itemContext, functionName, functionArgs);
+  itemContext.dispatchEvent(
+    UserActionEvent(
+      name: eventName,
+      sourceComponentId: itemContext.id,
+      context: eventContext ?? functionArgs,
+    ),
+  );
 }
 
 // 1. Category picker — shows one button per category. Tapping one calls
@@ -55,9 +89,12 @@ final categoryPicker = CatalogItem(
       children: [
         for (final category in categories)
           ElevatedButton(
-            onPressed: () => _callFunction(itemContext, 'setBrowsingCategory', {
-              'category': category,
-            }),
+            onPressed: () => _callFunctionAndNotify(
+              itemContext,
+              functionName: 'setBrowsingCategory',
+              functionArgs: {'category': category},
+              eventName: 'categoryPicked',
+            ),
             child: Text(category),
           ),
       ],

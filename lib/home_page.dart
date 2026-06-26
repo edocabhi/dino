@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dino/catalog_activity.dart';
 import 'package:dino/conversation.dart';
 import 'package:dino/model/featherless_model_client.dart';
 import 'package:dino/widgets/widgets.dart';
@@ -119,68 +120,79 @@ class _HomePageState extends State<HomePage> {
       ),
       body: _session == null
           ? const Center(child: CircularProgressIndicator())
-          : ValueListenableBuilder<ConversationState>(
-              valueListenable: _session!.conversationState,
-              builder: (context, state, _) {
-                final isProcessing = state.isWaiting;
-                // A "surface" is one generated UI the model produced. The model can
-                // create several over a conversation; this demo renders only the
-                // most recent one. `state.surfaces` is the list of their ids, in
-                // creation order, so the last is the latest.
-                final latestSurfaceId = state.surfaces.isNotEmpty
-                    ? state.surfaces.last
-                    : null;
+          : ValueListenableBuilder<bool>(
+              // A catalog widget's button can trigger a local function call
+              // (e.g. CategoryPicker -> setBrowsingCategory) without a model
+              // round-trip. This shows the same busy indicator for that as
+              // for waiting on the model, so an interaction never looks like
+              // a no-op.
+              valueListenable: CatalogActivity.isCallInProgress,
+              builder: (context, isCallInProgress, _) => ValueListenableBuilder<ConversationState>(
+                valueListenable: _session!.conversationState,
+                builder: (context, state, _) {
+                  final isProcessing = state.isWaiting || isCallInProgress;
+                  // A "surface" is one generated UI the model produced. The model can
+                  // create several over a conversation; this demo renders only the
+                  // most recent one. `state.surfaces` is the list of their ids, in
+                  // creation order, so the last is the latest.
+                  final latestSurfaceId = state.surfaces.isNotEmpty
+                      ? state.surfaces.last
+                      : null;
 
-                return Column(
-                  children: [
-                    Expanded(
-                      child: Row(
-                        crossAxisAlignment: .stretch,
-                        children: [
-                          // The rendered GenUI surface (latest only). `Surface` is
-                          // the widget that turns the model's A2UI into real widgets;
-                          // it just needs the render context for the surface to show.
-                          Expanded(
-                            child: latestSurfaceId == null || isProcessing
-                                ? const SizedBox.shrink()
-                                : Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: ListView(
-                                      children: [
-                                        Surface(
-                                          surfaceContext: _session!.contextFor(
-                                            latestSurfaceId,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                          ),
-                          if (_shouldShowDebugPanel) ...[
-                            const VerticalDivider(width: 1),
-                            // The raw A2UI JSON the model produced for this surface.
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: Row(
+                          crossAxisAlignment: .stretch,
+                          children: [
+                            // The rendered GenUI surface (latest only). `Surface` is
+                            // the widget that turns the model's A2UI into real widgets;
+                            // it just needs the render context for the surface to show.
                             Expanded(
-                              child: isProcessing
+                              child: latestSurfaceId == null || isProcessing
                                   ? const SizedBox.shrink()
-                                  : A2uiSourceView(
-                                      source: _session!.a2uiSource,
+                                  : Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: ListView(
+                                        children: [
+                                          Surface(
+                                            surfaceContext: _session!
+                                                .contextFor(
+                                                  latestSurfaceId,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                             ),
+                            if (_shouldShowDebugPanel) ...[
+                              const VerticalDivider(width: 1),
+                              // The raw A2UI JSON the model produced for this surface.
+                              Expanded(
+                                child: isProcessing
+                                    ? const SizedBox.shrink()
+                                    : A2uiSourceView(
+                                        source: _session!.a2uiSource,
+                                      ),
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    // Show a thinking indicator while the model streams its response.
-                    if (isProcessing)
-                      const LinearProgressIndicator(minHeight: 2),
-                    MessageInput(
-                      controller: _textController,
-                      isProcessing: isProcessing,
-                      onSend: sendMessage,
-                    ),
-                  ],
-                );
-              },
+                      // Show a thinking indicator while the model streams its
+                      // response, or a catalog widget's function call is
+                      // running.
+                      if (isProcessing)
+                        const LinearProgressIndicator(minHeight: 2),
+                      MessageInput(
+                        controller: _textController,
+                        isProcessing: isProcessing,
+                        onSend: sendMessage,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
     );
   }
