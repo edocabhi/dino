@@ -1,3 +1,4 @@
+import 'package:dino/dish_catalog_items.dart';
 import 'package:dino/order_functions.dart';
 import 'package:dino/order_state.dart';
 import 'package:genui/genui.dart';
@@ -26,25 +27,15 @@ Catalog buildCatalog(OrderState orderState) =>
         // and a `widgetBuilder` that renders it. Once listed here, the widget
         // is automatically described to the model in the system prompt.
         //
-        // Planned catalog items (see order_functions.dart for the
-        // ClientFunctions each one should wire its buttons/controls to via
-        // `action: {"functionCall": {"call": "...", "args": {...}}}`):
-        //
-        // 1. CategoryCatalog — lets the user pick a menu category to browse.
-        //    Wire category selection to `setBrowsingCategory`.
-        //
-        // 2. DishCard — shows one dish's detail with a quantity picker and
-        //    an "add to order" action. Wire the add action to
-        //    `addOrderItem`.
-        //
-        // 3. CartView — lists items across diners with quantity steppers and
-        //    a remove action, plus a "review order" action. Wire quantity
-        //    changes to `updateOrderItemQuantity`, removal to
-        //    `removeOrderItem`, and "review order" to `setSessionStatus`
-        //    (status: "reviewing").
-        //
-        // 4. PaymentCard — checkout/confirmation screen. Wire the
-        //    confirm/pay action to `setSessionStatus` (status: "confirmed").
+        // `dishCatalogItems` below are placeholder/dummy implementations of
+        // the four planned widgets (category picker, dish card, cart view,
+        // payment card) — see dish_catalog_items.dart. They're wired to the
+        // ClientFunctions in order_functions.dart end-to-end, so they're
+        // usable for testing right now. Replace each one's widgetBuilder (or
+        // the whole CatalogItem) with the real design whenever it's ready —
+        // nothing else depends on their visuals, only on the function calls
+        // they make.
+        ...dishCatalogItems,
       ],
       newFunctions: orderFunctions(orderState),
     );

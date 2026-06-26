@@ -21,9 +21,9 @@ class _HomePageState extends State<HomePage> {
   bool _shouldShowDebugPanel = false;
 
   @override
-  Future<void> initState() async {
+  void initState() {
     super.initState();
-    await _initSession();
+    unawaited(_initSession());
   }
 
   Future<void> _initSession() async {
