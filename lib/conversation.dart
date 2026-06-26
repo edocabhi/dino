@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:dino/catalog.dart';
 import 'package:dino/model/model_client.dart';
+import 'package:dino/order_state.dart';
 import 'package:dino/prompt.dart';
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart';
@@ -22,9 +25,13 @@ class GenUiSession {
     modelClientBuilder,
     String? additionalPromptContext,
   }) {
+    /// Tracks session/order status as the user interacts with widgets. Its
+    /// mutation methods are exposed to the catalog as ClientFunctions below.
+    _orderState = OrderState();
+
     /// The catalog defines the surfaces the model can render and how to
     /// render them.
-    final catalog = buildCatalog();
+    final catalog = buildCatalog(_orderState);
 
     // The controller renders surfaces from the catalog and tracks which ones
     // currently exist.
@@ -51,7 +58,7 @@ class GenUiSession {
     _transport = A2uiTransportAdapter(
       onSend: (message) async {
         await _modelClient
-            .sendMessage(_promptFor(message))
+            .sendMessage(_promptWithOrderState(message))
             .forEach(_transport.addChunk);
       },
     );
@@ -67,6 +74,7 @@ class GenUiSession {
   late final ModelClient _modelClient;
   late final A2uiTransportAdapter _transport;
   late final Conversation _conversation;
+  late final OrderState _orderState;
 
   /// The raw A2UI JSON of the current (or most recent) model turn, updated live
   /// as the response streams in.
@@ -100,6 +108,21 @@ class GenUiSession {
         .join('\n');
   }
 
+  /// Appends the current order/session state to [message]'s prompt text, but
+  /// only if it changed since the last turn.
+  ///
+  /// Widget-driven state mutations (e.g. a "remove item" button) happen
+  /// locally via ClientFunctions and never reach the model directly. This is
+  /// how the model finds out: each outgoing turn carries a fresh snapshot
+  /// when [OrderState.isDirty], so the model's next response reflects what
+  /// changed without needing every interaction to round-trip through it.
+  String _promptWithOrderState(ChatMessage message) {
+    final prompt = _promptFor(message);
+    final snapshot = _orderState.takeSnapshotIfDirty();
+    if (snapshot == null) return prompt;
+    return '$prompt\n\n[Current order/session state: ${jsonEncode(snapshot)}]';
+  }
+
   /// Looks up the render context for a surface by its id.
   ///
   /// Pass the result to a [Surface] widget to render that surface. Surface ids
@@ -114,5 +137,6 @@ class GenUiSession {
     _transport.dispose();
     _controller.dispose();
     _modelClient.dispose();
+    _orderState.dispose();
   }
 }

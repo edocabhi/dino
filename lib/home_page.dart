@@ -21,9 +21,9 @@ class _HomePageState extends State<HomePage> {
   bool _shouldShowDebugPanel = false;
 
   @override
-  void initState() {
+  Future<void> initState() async {
     super.initState();
-    _initSession();
+    await _initSession();
   }
 
   Future<void> _initSession() async {
@@ -62,6 +62,18 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // Tears down the current session (discarding any in-flight request along
+  // with it) and starts a fresh one, resetting both the conversation and the
+  // order/session state machine it owns.
+  void _resetSession() {
+    unawaited(_eventsSub?.cancel());
+    _session?.dispose();
+    setState(() {
+      _session = null;
+    });
+    unawaited(_initSession());
+  }
+
   // Send a message containing the user's text to the model. Blank input is
   // ignored.
   void sendMessage(String text) {
@@ -75,6 +87,13 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        leading: Tooltip(
+          message: 'Restart order',
+          child: IconButton(
+            icon: const Icon(Icons.restart_alt),
+            onPressed: _session == null ? null : _resetSession,
+          ),
+        ),
         title: const Text('Dino : Yabba Dabba Dish!'),
         actions: [
           Tooltip(
