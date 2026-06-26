@@ -66,6 +66,42 @@ Future<void> _callFunctionAndNotify(
   );
 }
 
+/// Adds an item to the current session's order without notifying the model.
+///
+/// Used by DishCard's "Add to order" so the tap acknowledges with a
+/// snackbar and the user can keep browsing instead of being whisked off to
+/// the cart on every add. The model finds out about the new item via the
+/// state snapshot on the user's next message (e.g. when they ask to see
+/// their cart).
+void _addToOrderLocally(
+  BuildContext context, {
+  required String dinerName,
+  required String dishName,
+  required double unitCost,
+  required int quantity,
+}) {
+  final orderState = CatalogActivity.currentOrderState;
+  if (orderState == null) return;
+  orderState.addItem(
+    dinerName: dinerName,
+    dishName: dishName,
+    unitCost: unitCost,
+    quantity: quantity,
+  );
+  ScaffoldMessenger.of(context)
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(
+        content: Text(
+          quantity > 1
+              ? 'Yabba dabba dish! $quantity × $dishName added for $dinerName.'
+              : 'Yabba dabba dish! $dishName added for $dinerName.',
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+}
+
 // 1. Category picker — shows one button per category. Tapping one calls
 // `setBrowsingCategory`. Placeholder for your teammate's category catalog
 // item.
@@ -204,16 +240,12 @@ class _DishCardState extends State<_DishCard> {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: () => _callFunctionAndNotify(
-                    widget.itemContext,
-                    functionName: 'addOrderItem',
-                    functionArgs: {
-                      'dinerName': dinerName,
-                      'dishName': dishName,
-                      'unitCost': unitCost,
-                      'quantity': _quantity,
-                    },
-                    eventName: 'orderItemAdded',
+                  onPressed: () => _addToOrderLocally(
+                    context,
+                    dinerName: dinerName,
+                    dishName: dishName,
+                    unitCost: unitCost,
+                    quantity: _quantity,
                   ),
                   child: const Text('Add to order'),
                 ),

@@ -69,13 +69,14 @@ Catalog buildCatalog(OrderState orderState) {
       'When the user triggers a `reviewOrderRequested` event, render a '
           'PaymentCard with `totalCost` equal to the sum of '
           '`quantity * unitCost` across all items in the order state.',
-      'When the user triggers an `orderItemAdded` event, render a CartView '
-          'so they can see the dish was added (the cart reads items from '
-          'local state, so just `{"component": "CartView"}` is enough).',
       'When the user triggers an `orderConfirmed` event, render a brief '
-          'caveman-style confirmation message (Text component) thanking '
-          'them for their order, plus a Button labeled "Return to menu" '
-          'whose action dispatches the event `returnToMenu`.',
+          'caveman-style confirmation Text thanking them for their order '
+          'AND prominently display the `confirmedOrderId` from the order '
+          'state snapshot as their pickup reference (e.g. "Pickup id: '
+          'DINO-XXXX — show this when you arrive"). Use the value exactly '
+          'as given; do not invent or alter it. Also include a Button '
+          'labeled "Return to menu" whose action dispatches the event '
+          '`returnToMenu`.',
       'When the user triggers a `returnToMenu` event, render a fresh '
           'CategoryPicker with the menu categories — the same surface you '
           'would have shown to start browsing.',

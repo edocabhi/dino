@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:genui/genui.dart';
 
@@ -53,6 +55,7 @@ class OrderState extends ChangeNotifier {
   SessionStatus _status = SessionStatus.browsing;
   final Map<String, DinerOrder> _diners = {};
   String? _browsingCategory;
+  String? _confirmedOrderId;
   bool _dirty = false;
   int _nextItemId = 0;
 
@@ -61,6 +64,11 @@ class OrderState extends ChangeNotifier {
   /// The menu category currently being browsed (e.g. "Appetizer"), as set by
   /// the category-selection catalog item. Null until a category is picked.
   String? get browsingCategory => _browsingCategory;
+
+  /// The pickup/reference id for the current order, assigned when [status]
+  /// transitions to [SessionStatus.confirmed] and cleared by
+  /// [startNewOrder]. Null at every other time.
+  String? get confirmedOrderId => _confirmedOrderId;
 
   /// Read-only view of diners and their orders, keyed by diner name.
   Map<String, DinerOrder> get diners => Map.unmodifiable(_diners);
@@ -161,9 +169,17 @@ class OrderState extends ChangeNotifier {
 
   /// Manually advances [status], e.g. to [SessionStatus.reviewing] or
   /// [SessionStatus.confirmed].
+  ///
+  /// Transitioning to [SessionStatus.confirmed] also assigns a random
+  /// pickup id ([confirmedOrderId]) the user can quote when they show up
+  /// to collect the order, so the model has a real id to surface on the
+  /// confirmation screen instead of making one up.
   void setStatus(SessionStatus status) {
     if (_status == status) return;
     _status = status;
+    if (status == SessionStatus.confirmed) {
+      _confirmedOrderId ??= _generateOrderId();
+    }
     _markDirty();
   }
 
@@ -177,8 +193,22 @@ class OrderState extends ChangeNotifier {
   void startNewOrder() {
     _diners.clear();
     _browsingCategory = null;
+    _confirmedOrderId = null;
     _status = SessionStatus.browsing;
     _markDirty();
+  }
+
+  /// Generates a short, human-pronounceable pickup id. Format: `DINO-XXXX`
+  /// where X is an uppercase alphanumeric. Collisions are theoretically
+  /// possible but irrelevant for a single-user demo.
+  static String _generateOrderId() {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    final rng = Random.secure();
+    final suffix = List.generate(
+      4,
+      (_) => alphabet[rng.nextInt(alphabet.length)],
+    ).join();
+    return 'DINO-$suffix';
   }
 
   void _markDirty() {
@@ -202,6 +232,7 @@ class OrderState extends ChangeNotifier {
   JsonMap toJson() => {
     'status': _status.name,
     if (_browsingCategory != null) 'browsingCategory': _browsingCategory,
+    if (_confirmedOrderId != null) 'confirmedOrderId': _confirmedOrderId,
     'diners': {
       for (final entry in _diners.entries) entry.key: entry.value.toJson(),
     },
