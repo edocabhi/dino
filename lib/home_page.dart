@@ -6,6 +6,7 @@ import 'package:dino/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:genui/genui.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -86,7 +87,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Color(0xffff9c29),
         leading: Tooltip(
           message: 'Restart order',
           child: IconButton(
@@ -94,7 +95,12 @@ class _HomePageState extends State<HomePage> {
             onPressed: _session == null ? null : _resetSession,
           ),
         ),
-        title: const Text('Dino : Yabba Dabba Dish!'),
+        title: Text(
+          'Dino : Yabba Dabba Dish!',
+          style: GoogleFonts.bricolageGrotesque(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           Tooltip(
             message: _shouldShowDebugPanel
