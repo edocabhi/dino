@@ -194,7 +194,7 @@ class _DishCardState extends State<_DishCard> {
                         ),
                       ),
                     ),
-                  SizedBox(
+                  const SizedBox(
                     width: 16,
                   ),
                   Flexible(
@@ -207,10 +207,10 @@ class _DishCardState extends State<_DishCard> {
                           dishName,
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-      
+
                         if (description != null) const SizedBox(height: 8),
                         if (description != null) Text(description),
-      
+
                         const SizedBox(height: 8),
                         Text('\$${unitCost.toStringAsFixed(2)}'),
                       ],
@@ -218,7 +218,7 @@ class _DishCardState extends State<_DishCard> {
                   ),
                 ],
               ),
-      
+
               Row(
                 children: [
                   IconButton(
@@ -302,7 +302,7 @@ final cartView = CatalogItem(
     final data = itemContext.data as JsonMap;
     final items = (data['items']! as List).cast<JsonMap>();
 
-    return Card(
+    return TornPaperCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
@@ -425,7 +425,7 @@ final paymentCard = CatalogItem(
     final data = itemContext.data as JsonMap;
     final totalCost = (data['totalCost']! as num).toDouble();
 
-    return Card(
+    return TornPaperCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
