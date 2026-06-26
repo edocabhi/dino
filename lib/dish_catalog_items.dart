@@ -379,7 +379,13 @@ class _CartRow extends StatelessWidget {
         children: [
           Expanded(child: Text('$dishName ($dinerName)')),
           IconButton(
-            icon: const Icon(Icons.remove),
+            icon: SizedBox(
+              height: 48,
+              width: 48,
+              child: SvgPicture.asset(
+                'assets/icons/bone_minus.svg',
+              ),
+            ),
             onPressed: () => _callFunction(
               itemContext,
               'updateOrderItemQuantity',
@@ -392,7 +398,13 @@ class _CartRow extends StatelessWidget {
           ),
           Text('$quantity'),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: SizedBox(
+              height: 48,
+              width: 48,
+              child: SvgPicture.asset(
+                'assets/icons/bone_add.svg',
+              ),
+            ),
             onPressed: () => _callFunction(
               itemContext,
               'updateOrderItemQuantity',
