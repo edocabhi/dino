@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:dino/catalog.dart';
+import 'package:dino/catalog_activity.dart';
 import 'package:dino/model/model_client.dart';
 import 'package:dino/order_state.dart';
 import 'package:dino/prompt.dart';
@@ -28,6 +29,9 @@ class GenUiSession {
     /// Tracks session/order status as the user interacts with widgets. Its
     /// mutation methods are exposed to the catalog as ClientFunctions below.
     _orderState = OrderState();
+    // Expose the per-session state to catalog item widgets that need to
+    // read or mutate it directly (e.g. CartView's optimistic +/- updates).
+    CatalogActivity.currentOrderState = _orderState;
 
     /// The catalog defines the surfaces the model can render and how to
     /// render them.
@@ -118,6 +122,17 @@ class GenUiSession {
   /// changed without needing every interaction to round-trip through it.
   String _promptWithOrderState(ChatMessage message) {
     final prompt = _promptFor(message);
+
+    // The model dispatches `returnToMenu` via a generic Button on the
+    // confirmation surface (it can't both functionCall and event in one
+    // tap). Intercept it here so the order is cleared before we snapshot
+    // — that way the model sees a freshly-cleared state in the same turn
+    // it's asked to re-render the CategoryPicker, and a new order can
+    // start cleanly.
+    if (prompt.contains('"name":"returnToMenu"')) {
+      _orderState.startNewOrder();
+    }
+
     final snapshot = _orderState.takeSnapshotIfDirty();
     if (snapshot == null) return prompt;
     return '$prompt\n\n[Current order/session state: ${jsonEncode(snapshot)}]';
@@ -133,6 +148,9 @@ class GenUiSession {
   /// Disposes the whole pipeline. Cancels conversation subscriptions, closes
   /// the transport and controller, and releases the model client's resources.
   void dispose() {
+    if (identical(CatalogActivity.currentOrderState, _orderState)) {
+      CatalogActivity.currentOrderState = null;
+    }
     _conversation.dispose();
     _transport.dispose();
     _controller.dispose();

@@ -55,10 +55,31 @@ Catalog buildCatalog(OrderState orderState) {
           "its properties (`dishName`, `description`, `unitCost`, `image`) "
           'come straight from the matching item in the menu data.',
       'Prefer CartView for showing the current order across diners, and '
-          'PaymentCard for the checkout/confirmation step.',
+          'PaymentCard for the checkout/confirmation step. CartView renders '
+          'its items directly from the local order state — do not pass '
+          'items in its data, an empty `{"component": "CartView"}` is '
+          'enough.',
       'When the user triggers a `categoryPicked` event, respond with a '
           'Column of DishCard components for every menu item whose '
           '`category` matches the picked category.',
+      'When the user triggers a `cartUpdateRequested` event, acknowledge '
+          'with a short Text noting the order is up to date (the CartView '
+          'itself already reflects the new totals), or re-render a fresh '
+          'CartView if no surface is currently showing.',
+      'When the user triggers a `reviewOrderRequested` event, render a '
+          'PaymentCard with `totalCost` equal to the sum of '
+          '`quantity * unitCost` across all items in the order state.',
+      'When the user triggers an `orderConfirmed` event, render a brief '
+          'caveman-style confirmation Text thanking them for their order '
+          'AND prominently display the `confirmedOrderId` from the order '
+          'state snapshot as their pickup reference (e.g. "Pickup id: '
+          'DINO-XXXX — show this when you arrive"). Use the value exactly '
+          'as given; do not invent or alter it. Also include a Button '
+          'labeled "Return to menu" whose action dispatches the event '
+          '`returnToMenu`.',
+      'When the user triggers a `returnToMenu` event, render a fresh '
+          'CategoryPicker with the menu categories — the same surface you '
+          'would have shown to start browsing.',
     ],
   );
 }
