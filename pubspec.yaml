@@ -1,0 +1,23 @@
+name: genui_template
+description: "A new Flutter project."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  genui: ^0.9.2
+  googleai_dart: ^8.0.0
+  openai_dart: ^1.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.1
+  very_good_analysis: ^10.3.0
+
+flutter:
+  uses-material-design: true
