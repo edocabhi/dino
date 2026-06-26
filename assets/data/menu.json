@@ -31,7 +31,7 @@
     "name": "Bedrock Bone Marrow Canoe",
     "description": "A roasted, split beef femur overflowing with rich, buttery marrow. It’s topped with a coarse herb chimichurri and served with grilled flatbread for scooping.",
     "cost": 28.00,
-    "image": "assets/images/bedrock_bone_marrow.jpg",
+    "image": "assets/images/bedrock_bone_marrow_canoe.jpg",
     "category": "Appetizer"
   },
   {
@@ -45,21 +45,21 @@
     "name": "Mammoth Meatball Skewers",
     "description": "Enormous, fire-roasted pork and venison meatballs skewered on a sharpened rosemary branch, served over a bed of smoky roasted root vegetables.",
     "cost": 26.99,
-    "image": "assets/images/mammoth_meatballs.jpg",
+    "image": "assets/images/mammoth_meatball_skewers.jpg",
     "category": "Main Course"
   },
   {
     "name": "Prehistoric Pasta Nest",
     "description": "Thick, hand-rolled ribbon pasta tossed in a rich, dark wild mushroom and truffle cream sauce, served inside a hollowed-out, roasted acorn squash \"bowl.\"",
     "cost": 24.50,
-    "image": "assets/images/prehistoric_pasta.jpg",
+    "image": "assets/images/prehistoric_pasta_nest.jpg",
     "category": "Main Course"
   },
   {
     "name": "The Dino-Drumstick",
     "description": "An oversized emu or goose leg, slow-braised in a deep red wine broth until the meat is incredibly tender, then flash-fried for a crackling exterior.",
     "cost": 32.00,
-    "image": "assets/images/dino_drumstick.jpg",
+    "image": "assets/images/the_dino_drumstick.jpg",
     "category": "Main Course"
   },
   {
