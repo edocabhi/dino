@@ -5,8 +5,8 @@ import 'package:dino/model/featherless_model_client.dart';
 import 'package:dino/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:genui/genui.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _initSession();
+    unawaited(_initSession());
   }
 
   Future<void> _initSession() async {
@@ -63,6 +63,18 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // Tears down the current session (discarding any in-flight request along
+  // with it) and starts a fresh one, resetting both the conversation and the
+  // order/session state machine it owns.
+  void _resetSession() {
+    unawaited(_eventsSub?.cancel());
+    _session?.dispose();
+    setState(() {
+      _session = null;
+    });
+    unawaited(_initSession());
+  }
+
   // Send a message containing the user's text to the model. Blank input is
   // ignored.
   void sendMessage(String text) {
@@ -76,6 +88,13 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xffff9c29),
+        leading: Tooltip(
+          message: 'Restart order',
+          child: IconButton(
+            icon: const Icon(Icons.restart_alt),
+            onPressed: _session == null ? null : _resetSession,
+          ),
+        ),
         title: Text(
           'Dino : Yabba Dabba Dish!',
           style: GoogleFonts.bricolageGrotesque(
