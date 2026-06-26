@@ -1,5 +1,5 @@
+import 'package:dino/model/model_client.dart';
 import 'package:genui/genui.dart' hide ChatMessage;
-import 'package:genui_template/model/model_client.dart';
 import 'package:openai_dart/openai_dart.dart' hide MessageRole;
 
 /// A [ModelClient] backed by a model hosted on Featherless.ai.

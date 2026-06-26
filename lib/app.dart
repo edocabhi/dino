@@ -1,5 +1,5 @@
+import 'package:dino/home_page.dart';
 import 'package:flutter/material.dart';
-import 'package:genui_template/home_page.dart';
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});

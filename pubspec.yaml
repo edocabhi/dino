@@ -1,5 +1,5 @@
-name: genui_template
-description: "A new Flutter project."
+name: dino
+description: "Dino is an AI-powered food court app that brings healthy, modern dining to the stone age with the slogan Yabba Dabba Dish! Built with Flutter Generative UI, it transforms nutritious eating into a fun, collaborative experience by letting groups order from multiple virtual stalls through one chat. Users simply state their health goals or cravings, and the AI instantly generates interactive, prehistoric-themed widgets to customize vitamin-rich, caveman-sized portions cooked with clean, modern techniques."
 publish_to: "none"
 version: 0.1.0+1
 
