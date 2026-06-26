@@ -12,7 +12,7 @@ class A2uiSourceView extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return ColoredBox(
-      color: theme.colorScheme.surfaceContainerHighest,
+      color: Colors.white70,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

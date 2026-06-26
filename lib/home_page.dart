@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dino/app.dart';
 import 'package:dino/conversation.dart';
 import 'package:dino/model/featherless_model_client.dart';
 import 'package:dino/widgets/widgets.dart';
@@ -87,7 +88,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xffff9c29),
+        backgroundColor: seedColor,
         leading: Tooltip(
           message: 'Restart order',
           child: IconButton(
@@ -98,6 +99,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(
           'Dino : Yabba Dabba Dish!',
           style: GoogleFonts.bricolageGrotesque(
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -145,14 +147,20 @@ class _HomePageState extends State<HomePage> {
                                 ? const SizedBox.shrink()
                                 : Padding(
                                     padding: const EdgeInsets.all(16),
-                                    child: ListView(
-                                      children: [
-                                        Surface(
-                                          surfaceContext: _session!.contextFor(
-                                            latestSurfaceId,
+                                    child: ColoredBox(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child: ListView(
+                                        children: [
+                                          Surface(
+                                            surfaceContext: _session!
+                                                .contextFor(
+                                                  latestSurfaceId,
+                                                ),
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
                                   ),
                           ),
@@ -173,10 +181,13 @@ class _HomePageState extends State<HomePage> {
                     // Show a thinking indicator while the model streams its response.
                     if (isProcessing)
                       const LinearProgressIndicator(minHeight: 2),
-                    MessageInput(
-                      controller: _textController,
-                      isProcessing: isProcessing,
-                      onSend: sendMessage,
+                    ColoredBox(
+                      color: Colors.white70,
+                      child: MessageInput(
+                        controller: _textController,
+                        isProcessing: isProcessing,
+                        onSend: sendMessage,
+                      ),
                     ),
                   ],
                 );
