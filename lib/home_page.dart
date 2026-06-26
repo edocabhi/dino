@@ -5,6 +5,7 @@ import 'package:dino/model/featherless_model_client.dart';
 import 'package:dino/widgets/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:genui/genui.dart';
 
 class HomePage extends StatefulWidget {
@@ -75,7 +76,12 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Dino : Yabba Dabba Dish!'),
+        title: Text(
+          'Dino : Yabba Dabba Dish!',
+          style: GoogleFonts.bricolageGrotesque(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         actions: [
           Tooltip(
             message: _shouldShowDebugPanel
