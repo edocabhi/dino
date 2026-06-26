@@ -1,0 +1,5 @@
+flutter_native_splash:
+  image: assets/images/dino_spalsh.png
+  color: "#FFFFFF"
+  fullscreen: true
+  ios_content_mode: scaleAspectFill
