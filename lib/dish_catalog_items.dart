@@ -1,5 +1,7 @@
+import 'package:dino/widgets/torn_paper_card.dart';
 import 'package:dino/catalog_activity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
@@ -82,7 +84,7 @@ final categoryPicker = CatalogItem(
   ),
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
-    final categories = (data['categories'] as List).cast<String>();
+    final categories = (data['categories']! as List).cast<String>();
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -162,62 +164,104 @@ class _DishCardState extends State<_DishCard> {
   @override
   Widget build(BuildContext context) {
     final data = widget.itemContext.data as JsonMap;
-    final dinerName = data['dinerName'] as String;
-    final dishName = data['dishName'] as String;
+    final dinerName = data['dinerName']! as String;
+    final dishName = data['dishName']! as String;
     final description = data['description'] as String?;
-    final unitCost = (data['unitCost'] as num).toDouble();
+    final unitCost = (data['unitCost']! as num).toDouble();
     final image = data['image'] as String?;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (image != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  image,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-              ),
-            Text(dishName, style: Theme.of(context).textTheme.titleMedium),
-            if (description != null) Text(description),
-            Text('\$${unitCost.toStringAsFixed(2)}'),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: _quantity > 1
-                      ? () => setState(() => _quantity--)
-                      : null,
-                ),
-                Text('$_quantity'),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => setState(() => _quantity++),
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () => _callFunction(
-                    widget.itemContext,
-                    'addOrderItem',
-                    {
-                      'dinerName': dinerName,
-                      'dishName': dishName,
-                      'unitCost': unitCost,
-                      'quantity': _quantity,
-                    },
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: TornPaperCard(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  if (image != null)
+                    Flexible(
+                      flex: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          image,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  SizedBox(
+                    width: 16,
                   ),
-                  child: const Text('Add to order'),
-                ),
-              ],
-            ),
-          ],
+                  Flexible(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          dishName,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+      
+                        if (description != null) const SizedBox(height: 8),
+                        if (description != null) Text(description),
+      
+                        const SizedBox(height: 8),
+                        Text('\$${unitCost.toStringAsFixed(2)}'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+      
+              Row(
+                children: [
+                  IconButton(
+                    icon: SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: SvgPicture.asset(
+                        'assets/icons/bone_minus.svg',
+                      ),
+                    ),
+                    onPressed: _quantity > 1
+                        ? () => setState(() => _quantity--)
+                        : null,
+                  ),
+                  Text('$_quantity'),
+                  IconButton(
+                    icon: SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: SvgPicture.asset(
+                        'assets/icons/bone_plus.svg',
+                      ),
+                    ),
+                    onPressed: () => setState(() => _quantity++),
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () => _callFunction(
+                      widget.itemContext,
+                      'addOrderItem',
+                      {
+                        'dinerName': dinerName,
+                        'dishName': dishName,
+                        'unitCost': unitCost,
+                        'quantity': _quantity,
+                      },
+                    ),
+                    child: const Text('Add to order'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -256,7 +300,7 @@ final cartView = CatalogItem(
   ),
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
-    final items = (data['items'] as List).cast<JsonMap>();
+    final items = (data['items']! as List).cast<JsonMap>();
 
     return Card(
       child: Padding(
@@ -316,11 +360,11 @@ class _CartRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dinerName = item['dinerName'] as String;
-    final itemId = item['itemId'] as String;
-    final dishName = item['dishName'] as String;
-    final quantity = (item['quantity'] as num).toInt();
-    final unitCost = (item['unitCost'] as num).toDouble();
+    final dinerName = item['dinerName']! as String;
+    final itemId = item['itemId']! as String;
+    final dishName = item['dishName']! as String;
+    final quantity = (item['quantity']! as num).toInt();
+    final unitCost = (item['unitCost']! as num).toDouble();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -379,7 +423,7 @@ final paymentCard = CatalogItem(
   ),
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
-    final totalCost = (data['totalCost'] as num).toDouble();
+    final totalCost = (data['totalCost']! as num).toDouble();
 
     return Card(
       child: Padding(
