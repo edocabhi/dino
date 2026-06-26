@@ -123,9 +123,9 @@ final categoryPicker = CatalogItem(
     final data = itemContext.data as JsonMap;
     final categories = (data['categories']! as List).cast<String>();
     return TornPaperCard(
-      child: SizedBox(
-        height: 70,
-        child: Center(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(8),
           child: Wrap(
             spacing: 8,
             runSpacing: 8,
