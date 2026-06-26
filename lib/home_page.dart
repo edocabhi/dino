@@ -75,7 +75,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Color(0xffff9c29),
         title: Text(
           'Dino : Yabba Dabba Dish!',
           style: GoogleFonts.bricolageGrotesque(
