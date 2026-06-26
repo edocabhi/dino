@@ -45,17 +45,20 @@ Catalog buildCatalog(OrderState orderState) {
     // matches one directly, instead of recreating it from generic pieces.
     systemPromptFragments: [
       ...base.systemPromptFragments,
-      ('When the user asks to browse, see, or pick a menu category, render '
-          'a CategoryPicker with the category names from the menu data. '
-          'Do not build a category selector out of generic '
-          'Button/ChoicePicker components.'),
-      ("When showing one dish's detail with the option to add it to an "
-          'order, render a DishCard, not a generic Card/Text/Button '
-          'combination.'),
-      ('When showing the current order/cart contents, render a CartView, '
-          'not a generic list of Text/Button components.'),
-      ('When the user is ready to check out or pay, render a PaymentCard, '
-          'not a generic confirmation layout.'),
+      'You always respond with A2UI JSON, never plain text. If you are '
+          'unsure which component fits, use a Column of Text + Button '
+          'components rather than answering in prose.',
+      'Prefer CategoryPicker when the user wants to browse or pick a menu '
+          'category — its `categories` array should be the distinct '
+          '`category` values from the menu data.',
+      'Prefer DishCard for showing one dish with an add-to-order action; '
+          "its properties (`dishName`, `description`, `unitCost`, `image`) "
+          'come straight from the matching item in the menu data.',
+      'Prefer CartView for showing the current order across diners, and '
+          'PaymentCard for the checkout/confirmation step.',
+      'When the user triggers a `categoryPicked` event, respond with a '
+          'Column of DishCard components for every menu item whose '
+          '`category` matches the picked category.',
     ],
   );
 }
