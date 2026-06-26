@@ -1,6 +1,8 @@
+import 'package:dino/widgets/torn_paper_card.dart';
 import 'package:dino/catalog_activity.dart';
 import 'package:dino/order_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:genui/genui.dart';
 import 'package:json_schema_builder/json_schema_builder.dart';
 
@@ -119,22 +121,29 @@ final categoryPicker = CatalogItem(
   ),
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
-    final categories = (data['categories'] as List).cast<String>();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: [
-        for (final category in categories)
-          ElevatedButton(
-            onPressed: () => _callFunctionAndNotify(
-              itemContext,
-              functionName: 'setBrowsingCategory',
-              functionArgs: {'category': category},
-              eventName: 'categoryPicked',
-            ),
-            child: Text(category),
+    final categories = (data['categories']! as List).cast<String>();
+    return TornPaperCard(
+      child: SizedBox(
+        height: 70,
+        child: Center(
+          child: Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final category in categories)
+                ElevatedButton(
+                  onPressed: () => _callFunctionAndNotify(
+                    itemContext,
+                    functionName: 'setBrowsingCategory',
+                    functionArgs: {'category': category},
+                    eventName: 'categoryPicked',
+                  ),
+                  child: Text(category),
+                ),
+            ],
           ),
-      ],
+        ),
+      ),
     );
   },
   exampleData: [
@@ -199,59 +208,101 @@ class _DishCardState extends State<_DishCard> {
   @override
   Widget build(BuildContext context) {
     final data = widget.itemContext.data as JsonMap;
-    final dinerName = data['dinerName'] as String;
-    final dishName = data['dishName'] as String;
+    final dinerName = data['dinerName']! as String;
+    final dishName = data['dishName']! as String;
     final description = data['description'] as String?;
-    final unitCost = (data['unitCost'] as num).toDouble();
+    final unitCost = (data['unitCost']! as num).toDouble();
     final image = data['image'] as String?;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (image != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  image,
-                  height: 120,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                ),
-              ),
-            Text(dishName, style: Theme.of(context).textTheme.titleMedium),
-            if (description != null) Text(description),
-            Text('\$${unitCost.toStringAsFixed(2)}'),
-            Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.remove),
-                  onPressed: _quantity > 1
-                      ? () => setState(() => _quantity--)
-                      : null,
-                ),
-                Text('$_quantity'),
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () => setState(() => _quantity++),
-                ),
-                const Spacer(),
-                ElevatedButton(
-                  onPressed: () => _addToOrderLocally(
-                    context,
-                    dinerName: dinerName,
-                    dishName: dishName,
-                    unitCost: unitCost,
-                    quantity: _quantity,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: TornPaperCard(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  if (image != null)
+                    Flexible(
+                      flex: 1,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          image,
+                          height: 120,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(
+                    width: 16,
                   ),
-                  child: const Text('Add to order'),
-                ),
-              ],
-            ),
-          ],
+                  Flexible(
+                    flex: 2,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        Text(
+                          dishName,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+
+                        if (description != null) const SizedBox(height: 8),
+                        if (description != null) Text(description),
+
+                        const SizedBox(height: 8),
+                        Text('\$${unitCost.toStringAsFixed(2)}'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              Row(
+                children: [
+                  IconButton(
+                    icon: SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: SvgPicture.asset(
+                        'assets/icons/bone_minus.svg',
+                      ),
+                    ),
+                    onPressed: _quantity > 1
+                        ? () => setState(() => _quantity--)
+                        : null,
+                  ),
+                  Text('$_quantity'),
+                  IconButton(
+                    icon: SizedBox(
+                      height: 48,
+                      width: 48,
+                      child: SvgPicture.asset(
+                        'assets/icons/bone_plus.svg',
+                      ),
+                    ),
+                    onPressed: () => setState(() => _quantity++),
+                  ),
+                  const Spacer(),
+                  ElevatedButton(
+                    onPressed: () => _addToOrderLocally(
+                      context,
+                      dinerName: dinerName,
+                      dishName: dishName,
+                      unitCost: unitCost,
+                      quantity: _quantity,
+                    ),
+                    child: const Text('Add to order'),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -313,7 +364,7 @@ class _CartView extends StatelessWidget {
           (sum, row) => sum + row.item.unitCost * row.item.quantity,
         );
 
-        return Card(
+        return TornPaperCard(
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -415,7 +466,13 @@ class _CartRow extends StatelessWidget {
           // The model finds out about these only when the user taps
           // "Update order" (or any other notify-style button).
           IconButton(
-            icon: const Icon(Icons.remove),
+            icon: SizedBox(
+              height: 48,
+              width: 48,
+              child: SvgPicture.asset(
+                'assets/icons/bone_minus.svg',
+              ),
+            ),
             onPressed: () => orderState.updateItemQuantity(
               dinerName: row.dinerName,
               itemId: item.id,
@@ -424,7 +481,13 @@ class _CartRow extends StatelessWidget {
           ),
           Text('${item.quantity}'),
           IconButton(
-            icon: const Icon(Icons.add),
+            icon: SizedBox(
+              height: 48,
+              width: 48,
+              child: SvgPicture.asset(
+                'assets/icons/bone_add.svg',
+              ),
+            ),
             onPressed: () => orderState.updateItemQuantity(
               dinerName: row.dinerName,
               itemId: item.id,
@@ -458,9 +521,9 @@ final paymentCard = CatalogItem(
   ),
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
-    final totalCost = (data['totalCost'] as num).toDouble();
+    final totalCost = (data['totalCost']! as num).toDouble();
 
-    return Card(
+    return TornPaperCard(
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(
