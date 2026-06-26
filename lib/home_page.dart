@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dino/app.dart';
 import 'package:dino/catalog_activity.dart';
 import 'package:dino/conversation.dart';
 import 'package:dino/model/featherless_model_client.dart';
@@ -88,7 +89,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xffff9c29),
+        backgroundColor: seedColor,
         leading: Tooltip(
           message: 'Restart order',
           child: IconButton(
@@ -99,6 +100,7 @@ class _HomePageState extends State<HomePage> {
         title: Text(
           'Dino : Yabba Dabba Dish!',
           style: GoogleFonts.bricolageGrotesque(
+            fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -139,20 +141,24 @@ class _HomePageState extends State<HomePage> {
                       ? state.surfaces.last
                       : null;
 
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: Row(
-                          crossAxisAlignment: .stretch,
-                          children: [
-                            // The rendered GenUI surface (latest only). `Surface` is
-                            // the widget that turns the model's A2UI into real widgets;
-                            // it just needs the render context for the surface to show.
-                            Expanded(
-                              child: latestSurfaceId == null || isProcessing
-                                  ? const SizedBox.shrink()
-                                  : Padding(
-                                      padding: const EdgeInsets.all(16),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: Row(
+                        crossAxisAlignment: .stretch,
+                        children: [
+                          // The rendered GenUI surface (latest only). `Surface` is
+                          // the widget that turns the model's A2UI into real widgets;
+                          // it just needs the render context for the surface to show.
+                          Expanded(
+                            child: latestSurfaceId == null || isProcessing
+                                ? const SizedBox.shrink()
+                                : Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: ColoredBox(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
                                       child: ListView(
                                         children: [
                                           Surface(
@@ -164,36 +170,37 @@ class _HomePageState extends State<HomePage> {
                                         ],
                                       ),
                                     ),
+                                  ),
+                          ),
+                          if (_shouldShowDebugPanel) ...[
+                            const VerticalDivider(width: 1),
+                            // The raw A2UI JSON the model produced for this surface.
+                            Expanded(
+                              child: isProcessing
+                                  ? const SizedBox.shrink()
+                                  : A2uiSourceView(
+                                      source: _session!.a2uiSource,
+                                    ),
                             ),
-                            if (_shouldShowDebugPanel) ...[
-                              const VerticalDivider(width: 1),
-                              // The raw A2UI JSON the model produced for this surface.
-                              Expanded(
-                                child: isProcessing
-                                    ? const SizedBox.shrink()
-                                    : A2uiSourceView(
-                                        source: _session!.a2uiSource,
-                                      ),
-                              ),
-                            ],
                           ],
-                        ),
+                        ],
                       ),
-                      // Show a thinking indicator while the model streams its
-                      // response, or a catalog widget's function call is
-                      // running.
-                      if (isProcessing)
-                        const LinearProgressIndicator(minHeight: 2),
-                      MessageInput(
+                    ),
+                    // Show a thinking indicator while the model streams its response.
+                    if (isProcessing)
+                      const LinearProgressIndicator(minHeight: 2),
+                    ColoredBox(
+                      color: Colors.white70,
+                      child: MessageInput(
                         controller: _textController,
                         isProcessing: isProcessing,
                         onSend: sendMessage,
                       ),
-                    ],
-                  );
-                },
-              ),
+                    ),
+                  ],
+                );
+              },
             ),
-    );
+    ));
   }
 }
