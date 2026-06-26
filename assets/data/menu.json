@@ -4,69 +4,149 @@
     "description": "A massive, bone-in rack of smoked beef short ribs slathered in a sticky molasses-BBQ glaze. It’s so heavy it’s guaranteed to tip your stone-wheeled car over when served.",
     "cost": 45.99,
     "image": "assets/images/bronto_rib_rack.jpg",
-    "category": "Main Course"
+    "category": "Main Course",
+    "calories": 1200,
+    "allergens": ["Soy", "Wheat"],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "60g",
+      "carbs": "45g",
+      "fat": "80g"
+    }
   },
   {
     "name": "Pterodactyl Wings",
     "description": "Giant jumbo turkey wings, dry-rubbed with wild herbs and wood-fired until the skin is perfectly crisp. Served with a side of spicy \"lava\" dipping sauce.",
     "cost": 18.99,
     "image": "assets/images/pterodactyl_wings.jpg",
-    "category": "Appetizer"
+    "category": "Appetizer",
+    "calories": 850,
+    "allergens": [],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "75g",
+      "carbs": "10g",
+      "fat": "55g"
+    }
   },
   {
     "name": "Saber-Tooth Tartare",
     "description": "Coarsely hand-chopped prime beef mixed with wild capers, sea salt, and a raw quail egg yolk on top. It's served over a flat, chilled river stone.",
     "cost": 24.99,
     "image": "assets/images/saber_tooth_tartare.jpg",
-    "category": "Appetizer"
+    "category": "Appetizer",
+    "calories": 500,
+    "allergens": ["Egg"],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "45g",
+      "carbs": "2g",
+      "fat": "35g"
+    }
   },
   {
     "name": "Yabba-Dabba Double Burger",
     "description": "Two thick, hand-pressed bison patties topped with melted smoked gouda, thick-cut wild boar bacon, and a fried egg, all sandwiched between two heavy, artisanal potato-bread \"buns.\"",
     "cost": 22.50,
     "image": "assets/images/yabba_dabba_double_burger.jpg",
-    "category": "Main Course"
+    "category": "Main Course",
+    "calories": 1100,
+    "allergens": ["Dairy", "Wheat", "Egg"],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "65g",
+      "carbs": "50g",
+      "fat": "70g"
+    }
   },
   {
     "name": "Bedrock Bone Marrow Canoe",
     "description": "A roasted, split beef femur overflowing with rich, buttery marrow. It’s topped with a coarse herb chimichurri and served with grilled flatbread for scooping.",
     "cost": 28.00,
     "image": "assets/images/bedrock_bone_marrow_canoe.jpg",
-    "category": "Appetizer"
+    "category": "Appetizer",
+    "calories": 900,
+    "allergens": ["Wheat"],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "15g",
+      "carbs": "30g",
+      "fat": "85g"
+    }
   },
   {
     "name": "The Gravelberry Tart",
     "description": "A rustic, free-form galette packed with wild blackberries, huckleberries, and elderberries, baked in a flaky, stone-ground wheat crust and drizzled with raw honey.",
     "cost": 12.50,
     "image": "assets/images/gravelberry_tart.jpg",
-    "category": "Dessert"
+    "category": "Dessert",
+    "calories": 600,
+    "allergens": ["Wheat"],
+    "isVegetarian": true,
+    "nutritionInformation": {
+      "protein": "5g",
+      "carbs": "85g",
+      "fat": "25g"
+    }
   },
   {
     "name": "Mammoth Meatball Skewers",
     "description": "Enormous, fire-roasted pork and venison meatballs skewered on a sharpened rosemary branch, served over a bed of smoky roasted root vegetables.",
     "cost": 26.99,
     "image": "assets/images/mammoth_meatball_skewers.jpg",
-    "category": "Main Course"
+    "category": "Main Course",
+    "calories": 750,
+    "allergens": [],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "55g",
+      "carbs": "20g",
+      "fat": "45g"
+    }
   },
   {
     "name": "Prehistoric Pasta Nest",
     "description": "Thick, hand-rolled ribbon pasta tossed in a rich, dark wild mushroom and truffle cream sauce, served inside a hollowed-out, roasted acorn squash \"bowl.\"",
     "cost": 24.50,
     "image": "assets/images/prehistoric_pasta_nest.jpg",
-    "category": "Main Course"
+    "category": "Main Course",
+    "calories": 800,
+    "allergens": ["Wheat", "Dairy", "Egg"],
+    "isVegetarian": true,
+    "nutritionInformation": {
+      "protein": "20g",
+      "carbs": "90g",
+      "fat": "40g"
+    }
   },
   {
     "name": "The Dino-Drumstick",
     "description": "An oversized emu or goose leg, slow-braised in a deep red wine broth until the meat is incredibly tender, then flash-fried for a crackling exterior.",
     "cost": 32.00,
     "image": "assets/images/the_dino_drumstick.jpg",
-    "category": "Main Course"
+    "category": "Main Course",
+    "calories": 1050,
+    "allergens": [],
+    "isVegetarian": false,
+    "nutritionInformation": {
+      "protein": "90g",
+      "carbs": "15g",
+      "fat": "65g"
+    }
   },
   {
     "name": "The Tar Pit Lava Cake",
     "description": "A rich, dark chocolate fondant cake with a molten fudge center that flows like lava when cut open, dusted with crushed \"ash\" (black sugar crystals).",
     "cost": 14.99,
     "image": "assets/images/tar_pit_lava_cake.jpg",
-    "category": "Dessert"
+    "category": "Dessert",
+    "calories": 950,
+    "allergens": ["Wheat", "Dairy", "Egg", "Soy"],
+    "isVegetarian": true,
+    "nutritionInformation": {
+      "protein": "10g",
+      "carbs": "110g",
+      "fat": "55g"
+    }
   }
 ]

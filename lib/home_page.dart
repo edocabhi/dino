@@ -18,6 +18,7 @@ class _HomePageState extends State<HomePage> {
   GenUiSession? _session;
   final _textController = TextEditingController();
   StreamSubscription<ConversationEvent>? _eventsSub;
+  bool _shouldShowDebugPanel = false;
 
   @override
   void initState() {
@@ -75,6 +76,21 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Dino : Yabba Dabba Dish!'),
+        actions: [
+          Tooltip(
+            message: _shouldShowDebugPanel
+                ? 'Hide debug panel'
+                : 'Show debug panel',
+            child: Switch(
+              value: _shouldShowDebugPanel,
+              onChanged: (value) {
+                setState(() {
+                  _shouldShowDebugPanel = value;
+                });
+              },
+            ),
+          ),
+        ],
       ),
       body: _session == null
           ? const Center(child: CircularProgressIndicator())
@@ -115,13 +131,17 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                   ),
                           ),
-                          const VerticalDivider(width: 1),
-                          // The raw A2UI JSON the model produced for this surface.
-                          Expanded(
-                            child: isProcessing
-                                ? const SizedBox.shrink()
-                                : A2uiSourceView(source: _session!.a2uiSource),
-                          ),
+                          if (_shouldShowDebugPanel) ...[
+                            const VerticalDivider(width: 1),
+                            // The raw A2UI JSON the model produced for this surface.
+                            Expanded(
+                              child: isProcessing
+                                  ? const SizedBox.shrink()
+                                  : A2uiSourceView(
+                                      source: _session!.a2uiSource,
+                                    ),
+                            ),
+                          ],
                         ],
                       ),
                     ),
