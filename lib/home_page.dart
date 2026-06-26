@@ -80,6 +80,14 @@ class _HomePageState extends State<HomePage> {
   // ignored.
   void sendMessage(String text) {
     if (text.trim().isEmpty) return;
+
+    // Check if user wants to go back to main menu
+    if (text.trim().toLowerCase() == 'show me the main menu') {
+      _resetSession();
+      _textController.clear();
+      return;
+    }
+
     _session?.sendMessage(text);
     _textController.clear();
   }
@@ -143,9 +151,8 @@ class _HomePageState extends State<HomePage> {
                           // the widget that turns the model's A2UI into real widgets;
                           // it just needs the render context for the surface to show.
                           Expanded(
-                            child: latestSurfaceId == null || isProcessing
-                                ? const SizedBox.shrink()
-                                : Padding(
+                            child: latestSurfaceId == null
+                                ? Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: ColoredBox(
                                       color: Theme.of(context)
@@ -153,16 +160,37 @@ class _HomePageState extends State<HomePage> {
                                           .surfaceContainerHighest,
                                       child: ListView(
                                         children: [
-                                          Surface(
-                                            surfaceContext: _session!
-                                                .contextFor(
-                                                  latestSurfaceId,
-                                                ),
+                                          _InitialCategoryPicker(
+                                            onCategorySelected: (category) {
+                                              _session?.sendMessage(
+                                                'Show me $category items from the menu',
+                                              );
+                                            },
                                           ),
                                         ],
                                       ),
                                     ),
-                                  ),
+                                  )
+                                : isProcessing
+                                    ? const SizedBox.shrink()
+                                    : Padding(
+                                        padding: const EdgeInsets.all(16),
+                                        child: ColoredBox(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .surfaceContainerHighest,
+                                          child: ListView(
+                                            children: [
+                                              Surface(
+                                                surfaceContext: _session!
+                                                    .contextFor(
+                                                      latestSurfaceId,
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
                           ),
                           if (_shouldShowDebugPanel) ...[
                             const VerticalDivider(width: 1),
@@ -193,6 +221,60 @@ class _HomePageState extends State<HomePage> {
                 );
               },
             ),
+    );
+  }
+}
+
+class _InitialCategoryPicker extends StatelessWidget {
+  final Function(String) onCategorySelected;
+
+  const _InitialCategoryPicker({required this.onCategorySelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = ['Appetizer', 'Main Course', 'Dessert'];
+    final categoryImages = {
+      'Appetizer': 'assets/images/appetizer.png',
+      'Main Course': 'assets/images/maincourse.png',
+      'Dessert': 'assets/images/dessert.png',
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final category in categories)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onCategorySelected(category),
+                borderRadius: BorderRadius.circular(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height: 120,
+                        width: double.infinity,
+                        child: Image.asset(
+                          categoryImages[category] ?? 'assets/images/placeholder.png',
+                          height: 120,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            height: 120,
+                            color: Colors.grey[300],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

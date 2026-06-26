@@ -49,16 +49,73 @@ final categoryPicker = CatalogItem(
   widgetBuilder: (itemContext) {
     final data = itemContext.data as JsonMap;
     final categories = (data['categories'] as List).cast<String>();
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+
+    // Map category names to image assets
+    final categoryImages = {
+      'Appetizer': 'assets/images/appetizer.png',
+      'Main Course': 'assets/images/main_course.png',
+      'Dessert': 'assets/images/dessert.png',
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         for (final category in categories)
-          ElevatedButton(
-            onPressed: () => _callFunction(itemContext, 'setBrowsingCategory', {
-              'category': category,
-            }),
-            child: Text(category),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => _callFunction(itemContext, 'setBrowsingCategory', {
+                  'category': category,
+                }),
+                borderRadius: BorderRadius.circular(12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Stack(
+                    children: [
+                      Image.asset(
+                        categoryImages[category] ?? 'assets/images/placeholder.png',
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 120,
+                          color: Colors.grey[300],
+                        ),
+                      ),
+                      Container(
+                        height: 120,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.6),
+                            ],
+                          ),
+                        ),
+                        child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Text(
+                              category,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
           ),
       ],
     );
