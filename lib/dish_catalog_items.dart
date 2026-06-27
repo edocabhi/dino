@@ -485,7 +485,7 @@ class _CartRow extends StatelessWidget {
               height: 48,
               width: 48,
               child: SvgPicture.asset(
-                'assets/icons/bone_add.svg',
+                'assets/icons/bone_plus.svg',
               ),
             ),
             onPressed: () => orderState.updateItemQuantity(
